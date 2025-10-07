@@ -1,0 +1,96 @@
+# Sapien AI-Quest Backend - Setup and Run Commands
+
+## 1. Install Dependencies
+```bash
+pip install fastapi uvicorn sqlalchemy pydantic python-dotenv
+pip install pydantic-settings
+pip install bcrypt
+pip install email-validator
+pip install python-jose[cryptography]
+pip install google-generativeai
+pip install python-multipart
+```
+
+## 2. Start the Server
+```bash
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+## 3. Test the API
+```bash
+# Health check
+curl http://localhost:8000/health
+
+# Get all quests
+curl http://localhost:8000/api/quests/
+
+# Get API documentation
+# Open browser: http://localhost:8000/docs
+```
+
+## 4. Create Admin User (First Time Setup)
+```bash
+python -c "from app.database import SessionLocal; from app.models.admin import AdminUser; db = SessionLocal(); admin = AdminUser(email='admin@example.com', full_name='Admin User', is_super_admin=True); admin.set_password('admin123'); db.add(admin); db.commit(); print('Admin user created successfully'); db.close()"
+```
+
+## 5. Test Admin Login
+```bash
+python -c "import requests; import json; data = {'email': 'admin@example.com', 'password': 'admin123'}; response = requests.post('http://localhost:8000/api/auth/login', json=data); print('Status:', response.status_code); print('Response:', response.text)"
+```
+
+## 6. Test Quest Creation
+```bash
+python -c "import requests; import json; data = {'title': 'Test Quest', 'description': 'Test Description', 'context': 'Test Context', 'properties': {}, 'instructions': {}, 'additional_text': {}, 'distribution_rules': {}, 'initial_pool': 1000.0, 'treasury_percentage': 10.0, 'user_percentage': 90.0}; response = requests.post('http://localhost:8000/api/quests/json', json=data, headers={'Authorization': 'Bearer YOUR_TOKEN_HERE'}); print('Status:', response.status_code); print('Response:', response.text)"
+```
+
+## 7. Test User Creation
+```bash
+python -c "import requests; import json; data = {'user_id': 'testuser123', 'username': 'testuser', 'email': 'test@example.com'}; response = requests.post('http://localhost:8000/api/users/', json=data); print('Status:', response.status_code); print('Response:', response.text)"
+```
+
+## 8. Test Quest Participation
+```bash
+python -c "import requests; import json; data = {'user_id': 'testuser123'}; response = requests.post('http://localhost:8000/api/quests/QUEST_ID_HERE/join', json=data); print('Status:', response.status_code); print('Response:', response.text)"
+```
+
+## 9. Test AI Messaging
+```bash
+python -c "import requests; import json; data = {'user_id': 'testuser123', 'content': 'Hello AI, how are you?'}; response = requests.post('http://localhost:8000/api/quests/QUEST_ID_HERE/messages', json=data); print('Status:', response.status_code); print('Response:', response.text)"
+```
+
+## 10. Test Payment Processing
+```bash
+python -c "import requests; import json; data = {'user_id': 'testuser123', 'quest_id': 'QUEST_ID_HERE', 'amount': 1.0, 'payment_type': 'extra_input'}; response = requests.post('http://localhost:8000/api/payments/process-payment', json=data); print('Status:', response.status_code); print('Response:', response.text)"
+```
+
+## 11. Get Quest Pool Totals
+```bash
+python -c "import requests; response = requests.get('http://localhost:8000/api/payments/quest/QUEST_ID_HERE/pool-totals'); print('Status:', response.status_code); print('Response:', response.text)"
+```
+
+## 12. Get Platform Totals
+```bash
+python -c "import requests; response = requests.get('http://localhost:8000/api/payments/platform/totals'); print('Status:', response.status_code); print('Response:', response.text)"
+```
+
+## 13. Get Treasury Info
+```bash
+python -c "import requests; response = requests.get('http://localhost:8000/api/treasury/'); print('Status:', response.status_code); print('Response:', response.text)"
+```
+
+## 14. Get Daily AI Messages Stats
+```bash
+python -c "import requests; response = requests.get('http://localhost:8000/api/daily-ai-messages/stats'); print('Status:', response.status_code); print('Response:', response.text)"
+```
+
+## 15. Get All Available Endpoints
+```bash
+python -c "import requests; response = requests.get('http://localhost:8000/openapi.json'); data = response.json(); print('Available endpoints:'); [print(f'{method.upper()} {path}') for path, methods in data['paths'].items() for method in methods.keys()]"
+```
+
+## Notes:
+- Replace `YOUR_TOKEN_HERE` with actual JWT token from admin login
+- Replace `QUEST_ID_HERE` with actual quest ID from quest creation
+- All commands assume you're in the project root directory
+- Server must be running before testing endpoints
+- Use PowerShell on Windows or bash on Linux/Mac
